@@ -11,11 +11,12 @@ ACCOUNT_TO_FILE_CSV = './attachments.csv'
 def download_attachments(args):
 	session = requests.Session()
 	try:
-		sf = Salesforce(username=args.get('user'), 
+		sf = Salesforce(domain='login',
+						username=args.get('user'), 
 						password=args.get('passwd'), 
 						security_token=args.get('token'), 
 						session=session)
-	except Exception, e:
+	except Exception as e:
 		logging.error("Failed to connect SFDC: %s", str(e))
 		return
 
@@ -24,7 +25,7 @@ def download_attachments(args):
 
 	if args.get('account_only'):
 		query = ("SELECT Id, ParentId, Name, Body FROM Attachment "
-				 "WHERE ParentId in (SELECT Id FROM Account)")
+				 "WHERE parent.type = 'ppploan__c'")
 	else:
 		query = "SELECT Id, ParentId, Name, Body FROM Attachment"
 
@@ -57,7 +58,7 @@ def download_attachments(args):
 
 		remote_path = "https://{0}.salesforce.com{1}".format(sf_pod, body_uri)
 		local_file = '%s_%s' % (record.get('Id'), remote_file)
-		local_path = os.path.join(storage_dir, local_file)
+		local_path = os.path.join(storage_dir, local_file.replace(":", " "))
 		
 		logging.info("Downloading %s to %s", remote_file, local_path)
 		logging.debug("Remote URL: %s", remote_path)
@@ -110,14 +111,14 @@ if __name__ == "__main__":
 		sys.exit(1)
 
 	if not os.path.exists(args.storage):
-		print "ERROR: Storage path doesn't exist"
+		print("ERROR: Storage path doesn't exist")
 		sys.exit(1)
 
 	if not os.path.isdir(args.storage):
-		print "ERROR: Storage path must be a directory"
+		print("ERROR: Storage path must be a directory")
 		sys.exit(1)
 
-	print "Starting downloader..."
+	print("Starting downloader...")
 
 	logging.basicConfig(level=logging.DEBUG, 
 						format='%(asctime)s - %(levelname)s - %(message)s',
@@ -126,4 +127,4 @@ if __name__ == "__main__":
 
 	download_attachments(vars(args))
 
-	print "Done."
+	print("Done.")

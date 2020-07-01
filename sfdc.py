@@ -10,7 +10,7 @@ SFDC_SERVICE_URL = "https://{0}.salesforce.com/services/data/v{1}"
 
 def log_exception(ex_msg):
 	if DEBUG:
-		print "[EXCEPTION]: %s" % str(e)
+		print("[EXCEPTION]: %s", str(e))
 
 class SFDC(object):
 	def __init__(self, config_path):
@@ -26,12 +26,12 @@ class SFDC(object):
 			with open(config_path) as f:
 				sfdc_config = yaml.load(f)
 		except:
-			print "[ERROR]: Cannot load config file %s" % config_path
+			print("[ERROR]: Cannot load config file %s", config_path)
 			return False
 
 		# Username and password must be set in config file
 		if 'user' not in sfdc_config or 'password' not in sfdc_config:
-		   	print "[ERROR]: Config must contain 'user' and 'password'"
+		   	print("[ERROR]: Config must contain 'user' and 'password'")
 		   	return False
 
 		self._api_version = "36.0"
@@ -53,8 +53,8 @@ class SFDC(object):
 								  security_token=token,
 								  session=session,
 								  sandbox=is_sandbox)
-		except Exception, e:
-			print "[ERROR]: Cannot connect to SFDC", str(e)
+		except Exception as e:
+			print("[ERROR]: Cannot connect to SFDC, %s", str(e))
 			return False
 
 		self._auth_id = 'Bearer ' + self._sf.session_id
@@ -72,9 +72,9 @@ class SFDC(object):
 		self._tooling_api = self._service_url + '/tooling/query/'
 
 		if DEBUG:
-			print "[DEBUG]: Base URL", self._base_url
-			print "[DEBUG]: Service URL", self._service_url
-			print "[DEBUG]: Tooling API", self._tooling_api
+			print("[DEBUG]: Base URL %s", self._base_url)
+			print("[DEBUG]: Service URL %s", self._service_url)
+			print("[DEBUG]: Tooling API %s", self._tooling_api)
 
 	def _get_headers(self):
 		return {'Authorization': self._auth_id}
@@ -85,17 +85,17 @@ class SFDC(object):
 			resp = self._session.get(self._tooling_api,
 								 	 params={'q': q},
 								 	 headers=self._get_headers())
-		except Exception, e:
-			print "[ERROR]: Query tooling API failed"
+		except Exception as e:
+			print("[ERROR]: Query tooling API failed")
 			if DEBUG:
-				print "[EXCEPTION]: %s" % str(e)
+				print("[EXCEPTION]: %s", str(e))
 			return None
 
 		try:
 			j_resp = json.loads(resp.content)
 			return j_resp
-		except Exception, e:
-			print "[ERROR]: Tooling API response not JSON"
+		except Exception as e:
+			print("[ERROR]: Tooling API response not JSON")
 			log_exception(e)
 			return None
 
@@ -108,8 +108,8 @@ class SFDC(object):
 			resp = self._session.patch(resource_url, 
 									   data=params, 
 									   headers=headers)
-		except Exception, e:
-			print "[ERROR]: Update tooling API failed"
+		except Exception as e:
+			print("[ERROR]: Update tooling API failed")
 			log_exception(e)
 		return resp
 
@@ -123,8 +123,8 @@ class SFDC(object):
 									 	 res_uri, 
 									 	 headers=headers, 
 									 	 data=params)
-		except Exception, e:
-			print "[ERROR]: Update Analytics API failed"
+		except Exception as e:
+			print("[ERROR]: Update Analytics API failed")
 			log_exception(e)
 			return None
 		return resp
@@ -133,8 +133,8 @@ class SFDC(object):
 		""" Runs a SOQL query """
 		try:
 			result = self._sf.query_all(q)
-		except Exception, e:
-			print "[ERROR]: run_soql failed"
+		except Exception as e:
+			print("[ERROR]: run_soql failed")
 			log_exception(e)
 			return None
 		return result
